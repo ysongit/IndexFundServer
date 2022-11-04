@@ -43,7 +43,7 @@ router.post("/login", async (req, res) => {
           d.price = prices.data[0].prices[0].price;
           d.tokenname = prices.data[0].contract_name;
           d.total = prices.data[0].prices[0].price * d.amount;
-          total = prices.data[0].prices[0].price * d.amount;
+          total += prices.data[0].prices[0].price * d.amount;
           newData.push(d);
         }
 

@@ -8,11 +8,29 @@ const db = require("../helper/db");
 router.get("/getallfunds", async (req, res) => {
   try {
     const conn = await db();
-    const data = await conn.query("SELECT * FROM fund");
+    const funds = await conn.query("SELECT * FROM fund");
+    const newData = [];
+
+    for(let f of funds[0]){
+      const data = await conn.query(`SELECT * FROM token WHERE fundid ='${f.id}'`);
+      const newTokens = [];
+      for(let d of data[0]){
+        const data = await fetch(`https://api.covalenthq.com/v1/pricing/historical_by_addresses_v2/1/USD/${d.contractaddress}/?quote-currency=USD&format=JSON&key=${process.env.COVALENT_API}`);
+        const prices = await data.json();
+        console.log(prices.data[0]);
+        d.price = prices.data[0].prices[0].price;
+        d.url = prices.data[0].logo_url;
+        d.tokenname = prices.data[0].contract_name;
+        d.total = prices.data[0].prices[0].price * d.amount;
+        newTokens.push(d);
+      }
+      f.tokens = newTokens;
+      newData.push(f);
+    }
     if (conn) {
       await conn.end();
     }
-    res.json(data[0]);
+    res.json(newData);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
