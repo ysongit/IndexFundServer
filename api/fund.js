@@ -4,6 +4,7 @@ const fetch = require("node-fetch");
 const router = express.Router();
 
 const db = require("../helper/db");
+const formatDate = require("../helper/formatDate");
 
 router.get("/getallfunds", async (req, res) => {
   try {
@@ -11,17 +12,21 @@ router.get("/getallfunds", async (req, res) => {
     const funds = await conn.query("SELECT * FROM fund");
     const newData = [];
 
+    let past5days = new Date();
+    past5days.setDate(past5days.getDate() - 5);
+    past5days = formatDate(past5days);
+
     for(let f of funds[0]){
       const data = await conn.query(`SELECT * FROM token WHERE fundid ='${f.id}'`);
       const newTokens = [];
       for(let d of data[0]){
-        const data = await fetch(`https://api.covalenthq.com/v1/pricing/historical_by_addresses_v2/1/USD/${d.contractaddress}/?quote-currency=USD&format=JSON&key=${process.env.COVALENT_API}`);
+        const data = await fetch(`https://api.covalenthq.com/v1/pricing/historical_by_addresses_v2/1/USD/${d.contractaddress}/?quote-currency=USD&format=JSON&from=${past5days}&key=${process.env.COVALENT_API}`);
         const prices = await data.json();
-        console.log(prices.data[0]);
         d.price = prices.data[0].prices[0].price;
         d.url = prices.data[0].logo_url;
         d.tokenname = prices.data[0].contract_name;
         d.total = prices.data[0].prices[0].price * d.amount;
+        d.dates =  prices.data[0].prices;
         newTokens.push(d);
       }
       f.tokens = newTokens;

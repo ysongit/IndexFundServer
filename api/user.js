@@ -3,6 +3,7 @@ const fetch = require("node-fetch");
 const router = express.Router();
 
 const db = require("../helper/db");
+const formatDate = require("../helper/formatDate");
 
 router.get("/getallusers", async (req, res) => {
   try {
@@ -24,6 +25,10 @@ router.post("/login", async (req, res) => {
     let total = 0;
     let tokens = [];
 
+    let past5days = new Date();
+    past5days.setDate(past5days.getDate() - 5);
+    past5days = formatDate(past5days);
+
     const conn = await db();
     userData = await conn.query(`SELECT * FROM user WHERE address ='${address}'`);
     if (userData.length === 0) {
@@ -38,11 +43,12 @@ router.post("/login", async (req, res) => {
         const newData = [];
 
         for(let d of indexfund[0]){
-          const data = await fetch(`https://api.covalenthq.com/v1/pricing/historical_by_addresses_v2/1/USD/${d.contractaddress}/?quote-currency=USD&format=JSON&key=${process.env.COVALENT_API}`);
+          const data = await fetch(`https://api.covalenthq.com/v1/pricing/historical_by_addresses_v2/1/USD/${d.contractaddress}/?quote-currency=USD&format=JSON&from=${past5days}&key=${process.env.COVALENT_API}`);
           const prices = await data.json();
           d.price = prices.data[0].prices[0].price;
           d.tokenname = prices.data[0].contract_name;
           d.total = prices.data[0].prices[0].price * d.amount;
+          d.dates =  prices.data[0].prices;
           total += prices.data[0].prices[0].price * d.amount;
           newData.push(d);
         }

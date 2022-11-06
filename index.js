@@ -10,9 +10,11 @@ app.use(cors());
 
 const user = require("./api/user");
 const fund = require("./api/fund");
+const transaction = require("./api/transaction");
 
 app.use("/user", user);
 app.use("/fund", fund);
+app.use("/transaction", transaction);
 app.get('/', (req, res) => res.send('It Work'));
 
 const port = process.env.PORT || 4000;

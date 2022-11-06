@@ -21,3 +21,13 @@ CREATE TABLE token(
   contractaddress CHAR(42) NOT NULL,
   amount BIGINT NOT NULL
 );
+
+CREATE TABLE transactions(
+  id BIGINT AUTO_INCREMENT PRIMARY KEY,
+  useraddress CHAR(42) NOT NULL,
+  nameoffund varchar(300) NOT NULL,
+  typeoftransaction CHAR(10) NOT NULL,
+  amount BIGINT,
+  price BIGINT,
+  dateh TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
