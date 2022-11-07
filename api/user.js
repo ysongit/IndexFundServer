@@ -31,7 +31,8 @@ router.post("/login", async (req, res) => {
 
     const conn = await db();
     userData = await conn.query(`SELECT * FROM user WHERE address ='${address}'`);
-    if (userData.length === 0) {
+    console.log(userData[0])
+    if (userData[0].length === 0) {
       await conn.query(`INSERT INTO user (address, amount) VALUES ('${address}', 0)`);
       userData = await conn.query(`SELECT * FROM user WHERE address ='${address}'`);
     }
