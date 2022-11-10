@@ -41,6 +41,20 @@ router.get("/getallfunds", async (req, res) => {
   }
 });
 
+router.get("/getfundbyid/:fundid", async (req, res) => {
+  try {
+    const fundid = req.params.fundid;
+    const conn = await db();
+    const data = await conn.query(`SELECT * FROM fund WHERE id ='${fundid}'`);
+    if (conn) {
+      await conn.end();
+    }
+    res.json(data[0]);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
 router.get("/getallfundsbyuser/:useraddress", async (req, res) => {
   try {
     const useraddress = req.params.useraddress;
@@ -111,7 +125,6 @@ router.get("/getalltokensbyfund/:fundid", async (req, res) => {
     for(let d of data[0]){
       const data = await fetch(`https://api.covalenthq.com/v1/pricing/historical_by_addresses_v2/1/USD/${d.contractaddress}/?quote-currency=USD&format=JSON&key=${process.env.COVALENT_API}`);
       const prices = await data.json();
-      console.log(prices.data[0].prices[0].price);
       d.price = prices.data[0].prices[0].price;
       d.tokenname = prices.data[0].contract_name;
       d.total = prices.data[0].prices[0].price * d.amount;
