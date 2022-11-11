@@ -88,10 +88,10 @@ router.post("/createfund", async (req, res) => {
   try {
     const useraddress = req.body.useraddress;
     const tokenname = req.body.tokenname;
-    const price = req.body.price;
+    const contractaddress = req.body.contractaddress;
 
     const conn = await db();
-    const data = await conn.query(`INSERT INTO fund (useraddress, tokenname, price) VALUES ('${useraddress}','${tokenname}', '${price}')`);
+    const data = await conn.query(`INSERT INTO fund (useraddress, contractaddress, tokenname) VALUES ('${useraddress}', '${contractaddress}','${tokenname}')`);
     if (conn) {
       await conn.end();
     }
