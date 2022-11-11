@@ -9,6 +9,7 @@ CREATE TABLE user(
 CREATE TABLE fund(
   id BIGINT AUTO_INCREMENT PRIMARY KEY,
   useraddress CHAR(42) NOT NULL,
+  contractaddress CHAR(42) NOT NULL,
   tokenname CHAR(42) NOT NULL,
   numberofholders INT(255) NOT NULL DEFAULT 0,
   price BIGINT NOT NULL DEFAULT 0,

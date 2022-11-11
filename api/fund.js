@@ -55,6 +55,21 @@ router.get("/getfundbyid/:fundid", async (req, res) => {
   }
 });
 
+router.get("/getfundrecent/:address", async (req, res) => {
+  try {
+    const address = req.params.address;
+    const conn = await db();
+    const data = await conn.query(`SELECT * FROM fund WHERE useraddress ='${address}' ORDER BY createdate DESC`);
+    if (conn) {
+      await conn.end();
+    }
+    res.json(data[0]);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+
 router.get("/getallfundsbyuser/:useraddress", async (req, res) => {
   try {
     const useraddress = req.params.useraddress;
@@ -73,9 +88,10 @@ router.post("/createfund", async (req, res) => {
   try {
     const useraddress = req.body.useraddress;
     const tokenname = req.body.tokenname;
+    const price = req.body.price;
 
     const conn = await db();
-    const data = await conn.query(`INSERT INTO fund (useraddress, tokenname) VALUES ('${useraddress}','${tokenname}')`);
+    const data = await conn.query(`INSERT INTO fund (useraddress, tokenname, price) VALUES ('${useraddress}','${tokenname}', '${price}')`);
     if (conn) {
       await conn.end();
     }
@@ -150,6 +166,19 @@ router.post("/addtokentofund", async (req, res) => {
       await conn.end();
     }
     res.json(data);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+router.get("/getprice/:contractaddress", async (req, res) => {
+  try {  
+    const contractaddress = req.params.contractaddress;
+  
+    const data = await fetch(`https://api.covalenthq.com/v1/pricing/historical_by_addresses_v2/1/USD/${contractaddress}/?quote-currency=USD&format=JSON&key=${process.env.COVALENT_API}`);
+    const prices = await data.json();
+
+    res.json(prices);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
